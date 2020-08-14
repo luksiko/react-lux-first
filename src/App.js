@@ -17,10 +17,14 @@ class App extends Component {
 				description: this.state.description,
 				amount: this.state.amount,
 				add,
-			}
+			},
 		];
 
-		this.setState({ transactions });
+		this.setState({
+			transactions,
+			description: '', // обновляем состояние полей на пустое
+			amount: '', // обновляем состояние полей на пустое
+		});
 	};
 
 	addAmount = (e) => {
@@ -42,12 +46,14 @@ class App extends Component {
 
 				<main>
 					<div className='container'>
-						<Total />
-						<History />
+						<Total transactions={this.state.transactions} />
+						<History transactions={this.state.transactions} />
 						<Operation
 							addTransaction={this.addTransaction}
 							addAmount={this.addAmount}
 							addDescription={this.addDescription}
+							description={this.state.description} // обновляем состояние полей на пустое
+							amount={this.state.amount} // обновляем состояние полей на пустое
 						/>
 					</div>
 				</main>

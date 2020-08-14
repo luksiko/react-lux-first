@@ -11,7 +11,7 @@ class App extends Component {
 	};
 
 	addTransaction = (add) => {
-		const transactions = [...this.transactions,
+		const transactions = [...this.state.transactions,
 			{
 				id: `cmr${(+new Date()).toString(16)}`,
 				description: this.state.description,

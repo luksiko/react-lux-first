@@ -4,14 +4,27 @@ import History from './components/history/History';
 import Operation from './components/operation/Operation';
 
 class App extends Component {
+	// формируем состояние в котором храним данные.
 	state = {
-		transactions: [],
+		transactions: JSON.parse(localStorage.getItem('caclMoney')) || [],
 		description: '',
 		amount: '',
+		resultIncome: 0,
+		resultExpenses: 0,
+		totalBalance: 0,
 	};
+	// перед тем как смонтировать наш компонент на страницу нужно посчитать totalBalance из localStorage
+	componentWillMount() {
+		this.getTotalBalance();
+	}
+	componentDidUpdate() {
+		// this.getTotalBalance();
+		this.addStorage();
+	}
 
 	addTransaction = (add) => {
-		const transactions = [...this.state.transactions,
+		const transactions = [
+			...this.state.transactions,
 			{
 				id: `cmr${(+new Date()).toString(16)}`,
 				description: this.state.description,
@@ -24,18 +37,40 @@ class App extends Component {
 			transactions,
 			description: '', // обновляем состояние полей на пустое
 			amount: '', // обновляем состояние полей на пустое
+		}, this.getTotalBalance);
+	};
+
+	addAmount = (e) => this.setState({ amount: e.target.value });
+
+	addDescription = (e) => this.setState({ description: e.target.value });
+
+	getTotalBalance() {
+		const resultIncome = this.getIncoeme();
+		const resultExpenses = this.getExpenses();
+
+		const totalBalance = resultIncome - resultExpenses;
+
+		this.setState({
+			resultIncome,
+			resultExpenses,
+			totalBalance,
 		});
+	}
+	addStorage() {
+		localStorage.setItem('caclMoney', JSON.stringify(this.state.transactions));
+	}
+
+	getIncoeme = () =>
+		this.state.transactions.reduce((acc, item) => (item.add ? +item.amount + acc : acc), 0);
+
+	getExpenses = () =>
+		this.state.transactions.reduce((acc, item) => (!item.add ? +item.amount + acc : acc), 0);
+
+	delTransaction = (key) => {
+		const transactions = this.state.transactions.filter((item) => item.id !== key);
+		this.setState({ transactions }, this.getTotalBalance);
 	};
 
-	addAmount = (e) => {
-		this.setState({ amount: e.target.value });
-		console.log(this.state);
-	};
-
-	addDescription = (e) => {
-		this.setState({ description: e.target.value });
-		console.log(this.state);
-	};
 	render() {
 		return (
 			<>
@@ -46,13 +81,17 @@ class App extends Component {
 
 				<main>
 					<div className='container'>
-						<Total transactions={this.state.transactions} />
-						<History transactions={this.state.transactions} />
+						<Total
+							resultExpenses={this.state.resultExpenses}
+							resultIncome={this.state.resultIncome}
+							totalBalance={this.state.totalBalance}
+						/>
+						<History transactions={this.state.transactions} delTransaction={this.delTransaction} />
 						<Operation
 							addTransaction={this.addTransaction}
 							addAmount={this.addAmount}
 							addDescription={this.addDescription}
-							description={this.state.description} // обновляем состояние полей на пустое
+							description={this.state.description}
 							amount={this.state.amount} // обновляем состояние полей на пустое
 						/>
 					</div>
